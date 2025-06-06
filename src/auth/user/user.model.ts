@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { UserDoc, UserModel } from "../../constants/auth";
+import { AuthenticationService } from "../../services/auth.service";
 
 const userSchema = new mongoose.Schema(
   {
@@ -23,6 +24,17 @@ const userSchema = new mongoose.Schema(
     },
   }
 );
+
+userSchema.pre("save", async function (next) {
+  if (this.isModified("password") || this.isNew) {
+    const hashedPassword = new AuthenticationService().pwdToHash(
+      this.get("password")
+    );
+    this.set("password", hashedPassword);
+  }
+
+  next();
+});
 
 const User = mongoose.model<UserDoc, UserModel>("User", userSchema);
 

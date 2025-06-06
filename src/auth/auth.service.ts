@@ -1,5 +1,5 @@
 import { BadRequestError } from "../errors";
-import { CreateUserDto } from "./dtos/auth.dto";
+import { AuthDto } from "./dtos/auth.dto";
 import { NextFunction } from "express";
 import { userService, UserService } from "./user/user.service";
 import { AuthenticationService } from "../services/auth.service";
@@ -10,7 +10,7 @@ export class AuthService {
     public authService: AuthenticationService
   ) {}
 
-  async signup(createUserDto: CreateUserDto, next: NextFunction) {
+  async signup(createUserDto: AuthDto, next: NextFunction) {
     const existingUser = await this.userService.findOneByEmail(
       createUserDto.email
     );
@@ -27,6 +27,30 @@ export class AuthService {
 
     const jwt = this.authService.generateJwt(
       { email: createUserDto.email, userId: newUser.id },
+      process.env.JWT_SECRET!
+    );
+
+    return jwt;
+  }
+
+  async signin(signinUser: AuthDto, next: NextFunction) {
+    const existingUser = await this.userService.findOneByEmail(
+      signinUser.email
+    );
+    if (!existingUser) {
+      return next(new BadRequestError("Invalid Credentials"));
+    }
+
+    const matchedPassword = this.authService.pwdCompare(
+      existingUser.password,
+      signinUser.password
+    );
+    if (!matchedPassword) {
+      return next(new BadRequestError("Invalid Credentials"));
+    }
+
+    const jwt = this.authService.generateJwt(
+      { email: existingUser.email, userId: existingUser.id },
       process.env.JWT_SECRET!
     );
 
