@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express, { Application, ErrorRequestHandler } from "express";
 import path from "path";
+import { AuthRouter } from "./auth/auth.routers";
 import connectDB from "./db/db";
 import { NotFoundError } from "./errors";
 import { currentUser, errorHandler } from "./middlewares";
@@ -25,12 +26,12 @@ export class AppModule {
   }
 
   private setupMiddleware() {
-    this.app.set("trust proxy", true);
+    this.app.set("trust proxy", false);
 
     this.app.use(
       cors({
         origin: "*",
-        credentials: true,
+        credentials: false,
         optionsSuccessStatus: 200,
       })
     );
@@ -54,7 +55,9 @@ export class AppModule {
   }
 
   private setupRoutes() {
-    this.app.all("/api/*", (_req, _res, next) => {
+    console.log("Mounting AuthRouter on /api/auth");
+    this.app.use("/api/auth", AuthRouter);
+    this.app.all("/api", (_req, _res, next) => {
       next(new NotFoundError());
     });
   }

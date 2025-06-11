@@ -18,7 +18,9 @@ export class AuthService {
       return next(new BadRequestError("Email is taken!"));
     }
 
-    const hashedPassword = this.authService.pwdToHash(createUserDto.password);
+    const hashedPassword = await this.authService.pwdToHash(
+      createUserDto.password
+    );
 
     const newUser = await this.userService.create({
       email: createUserDto.email,
@@ -41,7 +43,7 @@ export class AuthService {
       return next(new BadRequestError("Invalid Credentials"));
     }
 
-    const matchedPassword = this.authService.pwdCompare(
+    const matchedPassword = await this.authService.pwdCompare(
       existingUser.password,
       signinUser.password
     );
