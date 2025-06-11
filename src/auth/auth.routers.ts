@@ -9,9 +9,9 @@ router.post(
   "/signup",
   async (req: Request, res: Response, next: NextFunction) => {
     const { email, password } = req.body;
-    const result = await authService.signup({ email, password }, next);
+    const jwt = await authService.signup({ email, password }, next);
 
-    req.session = { jwt: result.jwt };
+    req.session = { jwt };
 
     res.status(201).send(true);
   }
@@ -21,9 +21,9 @@ router.post(
   "/signin",
   async (req: Request, res: Response, next: NextFunction) => {
     const { email, password } = req.body;
-    const result = await authService.signin({ email, password }, next);
+    const jwt = await authService.signin({ email, password }, next);
 
-    req.session = { jwt: result.jwt };
+    req.session = { jwt };
 
     res.status(201).send(true);
   }
